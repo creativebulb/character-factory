@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Run Grandpa, Run!</title>
+
+	<link href="./css/shared.css" rel="stylesheet" type="text/css"/>
+	<link href="./css/grandpa.css" rel="stylesheet" type="text/css"/>
+	<script src="./js/grandpa.js"></script>
+ 
+	<script src="./lib/preloadjs-NEXT.min.js"></script>
+
+	<script src="./lib/easeljs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var stage, w, h, loader;
+	var sky, grandpa, ground, hill, hill2, priest;
+
+	function init() {
+		scwin.showDistractor();
+		stage = new createjs.Stage("testCanvas");
+
+		// grab canvas width and height for later calculations:
+		w = stage.canvas.width;
+		h = stage.canvas.height;
+
+		manifest = [
+			{src: "character.png", id: "character"},
+			{src: "sky.png", id: "sky"},
+			{src: "ground.png", id: "ground"},
+			{src: "hill1.png", id: "hill"},
+			{src: "hill2.png", id: "hill2"}
+		];
+
+		loader = new createjs.LoadQueue(false);
+		loader.addEventListener("complete", handleComplete);
+		loader.loadManifest(manifest, true, "./images/");
+	}
+
+	function handleComplete() {
+		scwin.hideDistractor();
+
+		sky = new createjs.Shape();
+		sky.graphics.beginBitmapFill(loader.getResult("sky")).drawRect(0, 0, w, h);
+
+		var groundImg = loader.getResult("ground");
+		ground = new createjs.Shape();
+		ground.graphics.beginBitmapFill(groundImg).drawRect(0, 0, w + groundImg.width, groundImg.height);
+		ground.tileW = groundImg.width;
+		ground.y = h - groundImg.height;
+
+		hill = new createjs.Bitmap(loader.getResult("hill"));
+		hill.setTransform(Math.random() * w, h - hill.image.height * 4 - groundImg.height, 4, 4);
+		hill.alpha = 0.5;
+
+		hill2 = new createjs.Bitmap(loader.getResult("hill2"));
+		hill2.setTransform(Math.random() * w, h - hill2.image.height * 3 - groundImg.height, 3, 3);
+
+		var spriteSheet_priest = new createjs.SpriteSheet({
+				framerate: 30,
+				"images": [loader.getResult("character")],
+				"frames": {"width": 94, "height": 96, "count": 15, "regX": 0, "regY": 0},
+				"animations": {
+					"priest_stand": [10, 14, "priest_stand", 0.1]
+				}
+			});
+		priest = new createjs.Sprite(spriteSheet_priest, "priest_stand");
+		priest.y = 225;
+		priest.x = w;
+		var spriteSheet_grandpa = new createjs.SpriteSheet({
+				framerate: 30,
+				"images": [loader.getResult("character")],
+				"frames": {"width": 96, "height": 96, "count": 15, "regX": 0, "regY": 0},
+				// define two animations, run (loops, 1.5x speed) and jump (returns to run):
+				"animations": {
+					"grandpa_run": [0, 4, "grandpa_run", 0.5],
+					"grandpa_stun": [5, 9, "grandpa_run", 0.5]
+				}
+			});
+		grandpa = new createjs.Sprite(spriteSheet_grandpa, "grandpa_run");
+		grandpa.y = 225;
+
+		stage.addChild(sky, hill, hill2, ground, grandpa, priest);
+		stage.addEventListener("stagemousedown", handleJumpStart);
+
+		createjs.Ticker.timingMode = createjs.Ticker.RAF;
+		createjs.Ticker.addEventListener("tick", tick);
+	}
+
+	function handleJumpStart() {
+		grandpa.gotoAndPlay("grandpa_stun");
+	}
+
+	function tick(event) {
+		var deltaS = event.delta / 1000;
+		var position = grandpa.x + 150 * deltaS;
+
+		var grandpaW = grandpa.getBounds().width * grandpa.scaleX;
+		grandpa.x = (position >= w + grandpaW) ? -grandpaW : position;
+
+		ground.x = (ground.x - deltaS * 150) % ground.tileW;
+		hill.x = (hill.x - deltaS * 30);
+		if (hill.x + hill.image.width * hill.scaleX <= 0) {
+			hill.x = w;
+		}
+		hill2.x = (hill2.x - deltaS * 45);
+		if (hill2.x + hill2.image.width * hill2.scaleX <= 0) {
+			hill2.x = w;
+		}
+		
+		var priestW = priest.getBounds().width * priest.scaleX;
+		priest.x = (priest.x - deltaS * 145);
+		if (priest.x + priestW * priest.scaleX <= 0) {
+			priest.x = w;
+		}
+
+		stage.update(event);
+	}
+</script>
+</head>
+
+<body onload="init();">
+<header class="EaselJS">
+	<h1>할배 & 목사</h1>
+	<h3>to-do list</h3>
+	<p>
+		1. 키 또는 마우스 이벤트로 특이 동작 구현
+	</p>
+	<p>
+		2. 다른 캐릭터 등장
+	</p>
+</header>
+
+<div>
+	<canvas id="testCanvas" width="960" height="400"></canvas>
+</div>
+
+</body>
+</html>
