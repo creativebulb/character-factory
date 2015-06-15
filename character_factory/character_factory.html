@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Run Grandpa, Run!</title>
+
+	<link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+	<script src="./js/character_factory.js"></script>
+ 
+	<script src="./lib/preloadjs-NEXT.min.js"></script>
+
+	<script src="./lib/easeljs-NEXT.combined.js"></script>
+
+<script id="editable">
+	var stage, w, h, loader;
+	var head, body, foot;
+	// var sky, grandpa, ground, hill, hill2, priest;
+
+	function init() {
+		scwin.showDistractor();
+		stage = new createjs.Stage("testCanvas");
+
+		// grab canvas width and height for later calculations:
+		w = stage.canvas.width;
+		h = stage.canvas.height;
+
+		manifest = [
+			{src: "head1.png", id: "head"},
+			{src: "body1.png", id: "body"},
+			{src: "foot1.png", id: "foot"}
+		];
+
+		loader = new createjs.LoadQueue(false);
+		loader.addEventListener("complete", handleComplete);
+		loader.loadManifest(manifest, true, "./images/");
+	}
+
+	function handleComplete() {
+		scwin.hideDistractor();
+
+
+		head = new createjs.Bitmap(loader.getResult("head"));
+		head.x = 95;
+		head.y = 25;
+		body = new createjs.Bitmap(loader.getResult("body"));
+		body.x = 105;
+		body.y = 220;
+		foot = new createjs.Bitmap(loader.getResult("foot"));
+		foot.x = 105;
+		foot.y = 390;
+
+		stage.addChild(head, body, foot);
+		stage.update();
+	}
+</script>
+</head>
+
+<body onload="init();">
+
+<div>
+	<div id="factory_div" style="width:504px;">
+		<div style="position:relative;float:left;width:52px;height:600px;">
+			<button id="head_btn_left" type="button" class="btn btn-default btn-lg" style="position:absolute;top:74px;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+			<button id="body_btn_left" type="button" class="btn btn-default btn-lg" style="position:absolute;top:274px;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+			<button id="foot_btn_left" type="button" class="btn btn-default btn-lg" style="position:absolute;top:474px;"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+		</div>
+		<canvas id="testCanvas" width="400" height="600" style="postion:relative;float:left;background-color:black"></canvas>
+		<div style="position:relative;float:right;width:52px;height:600px;">
+			<button id="head_btn_right" type="button" class="btn btn-default btn-lg" style="position:absolute;top:74px;"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+			<button id="body_btn_right" type="button" class="btn btn-default btn-lg" style="position:absolute;top:274px;"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+			<button id="foot_btn_right" type="button" class="btn btn-default btn-lg" style="position:absolute;top:474px;"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>
